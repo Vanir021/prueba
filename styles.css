@@ -1,0 +1,95 @@
+/* Estilo general */
+body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+h1 {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    margin: 0;
+    font-size: 2rem;
+}
+
+/* Contenedor del juego */
+#game-container {
+    margin: 20px auto;
+    width: 80%;
+    max-width: 600px;
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+/* Canvas del juego */
+#snake-game {
+    background-color: #e8f5e9;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+}
+
+/* Botones e inputs */
+button, input[type="text"] {
+    font-size: 1rem;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #4CAF50;
+    border-radius: 5px;
+    outline: none;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+input[type="text"] {
+    width: calc(100% - 22px);
+    box-sizing: border-box;
+}
+
+/* Tablero de ranking */
+#ranking-board {
+    margin: 20px auto;
+    width: 80%;
+    max-width: 600px;
+    border: 2px solid #2196F3;
+    border-radius: 10px;
+    background-color: #e3f2fd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: left;
+}
+
+#ranking-board h2 {
+    margin: 0 0 10px 0;
+    color: #2196F3;
+}
+
+#ranking-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#ranking-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+#ranking-list li:last-child {
+    border-bottom: none;
+}

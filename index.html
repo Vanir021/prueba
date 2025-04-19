@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego con Ranking</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #game-container {
+            margin: 20px auto;
+            width: 80%;
+            height: auto;
+            border: 2px solid #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #ranking-board {
+            margin: 20px auto;
+            width: 80%;
+            border: 1px solid #000;
+            padding: 10px;
+            text-align: left;
+        }
+        #ranking-board h2 {
+            margin: 0;
+        }
+        #ranking-list {
+            list-style: none;
+            padding: 0;
+        }
+        #snake-game {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bienvenido al Juego</h1>
+    <div id="game-container">
+        <!-- Juego de la Serpiente -->
+        <canvas id="snake-game" width="400" height="400" style="border: 1px solid #000;"></canvas>
+        <p>Puntos: <span id="score">0</span></p>
+        <input type="text" id="player-name" placeholder="Ingresa tu nombre">
+        <button id="save-score">Guardar Puntaje</button>
+    </div>
+    <div id="ranking-board">
+        <h2>Ranking de Jugadas</h2>
+        <ul id="ranking-list">
+            <!-- Los rankings se cargarán aquí -->
+        </ul>
+    </div>
+    <script>
+        // Cargar el ranking desde el almacenamiento local
+        const rankingList = document.getElementById('ranking-list');
+        const savedRanking = JSON.parse(localStorage.getItem('ranking')) || [];
+
+        function renderRanking() {
+            rankingList.innerHTML = '';
+            savedRanking.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${entry.name}: ${entry.score} puntos`;
+                rankingList.appendChild(li);
+            });
+        }
+
+        function addScore(name, score) {
+            savedRanking.push({ name, score });
+            savedRanking.sort((a, b) => b.score - a.score); // Ordenar por puntaje descendente
+            localStorage.setItem('ranking', JSON.stringify(savedRanking));
+            renderRanking();
+        }
+
+        renderRanking();
+
+        const canvas = document.getElementById('snake-game');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score');
+        const saveScoreButton = document.getElementById('save-score');
+        const playerNameInput = document.getElementById('player-name');
+
+        const box = 20; // Tamaño de cada celda
+        let score = 0;
+
+        let snake = [{ x: 9 * box, y: 10 * box }];
+        let food = {
+            x: Math.floor(Math.random() * 20) * box,
+            y: Math.floor(Math.random() * 20) * box,
+        };
+        let direction = null;
+
+        // Dibujar la serpiente y la comida
+        function drawGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar la serpiente
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? 'green' : 'lightgreen';
+                ctx.fillRect(segment.x, segment.y, box, box);
+                ctx.strokeStyle = 'darkgreen';
+                ctx.strokeRect(segment.x, segment.y, box, box);
+            });
+
+            // Dibujar la comida
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, box, box);
+        }
+
+        // Mover la serpiente con teletransporte
+        function moveSnake() {
+            const head = { ...snake[0] };
+
+            if (direction === 'LEFT') head.x -= box;
+            if (direction === 'UP') head.y -= box;
+            if (direction === 'RIGHT') head.x += box;
+            if (direction === 'DOWN') head.y += box;
+
+            // Teletransporte al cruzar los bordes
+            if (head.x < 0) head.x = canvas.width - box;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = canvas.height - box;
+            if (head.y >= canvas.height) head.y = 0;
+
+            // Verificar si la serpiente come la comida
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreDisplay.textContent = score;
+                food = {
+                    x: Math.floor(Math.random() * 20) * box,
+                    y: Math.floor(Math.random() * 20) * box,
+                };
+            } else {
+                snake.pop(); // Eliminar la cola si no come
+            }
+
+            // Agregar la nueva cabeza
+            snake.unshift(head);
+
+            // Verificar colisiones con el cuerpo
+            if (snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y)) {
+                clearInterval(game);
+                alert(`¡Juego terminado! Puntos: ${score}`);
+            }
+        }
+
+        // Controlar la dirección
+        document.addEventListener('keydown', event => {
+            if (event.key === 'ArrowLeft' && direction !== 'RIGHT') direction = 'LEFT';
+            if (event.key === 'ArrowUp' && direction !== 'DOWN') direction = 'UP';
+            if (event.key === 'ArrowRight' && direction !== 'LEFT') direction = 'RIGHT';
+            if (event.key === 'ArrowDown' && direction !== 'UP') direction = 'DOWN';
+        });
+
+        // Guardar puntaje en el ranking
+        saveScoreButton.addEventListener('click', () => {
+            const playerName = playerNameInput.value.trim();
+            if (playerName) {
+                addScore(playerName, score);
+                score = 0; // Reiniciar puntaje
+                scoreDisplay.textContent = score;
+                playerNameInput.value = ''; // Limpiar el campo de nombre
+                resetGame(); // Reiniciar el juego
+            } else {
+                alert('Por favor, ingresa tu nombre antes de guardar el puntaje.');
+            }
+        });
+
+        // Reiniciar el juego
+        function resetGame() {
+            snake = [{ x: 9 * box, y: 10 * box }];
+            food = {
+                x: Math.floor(Math.random() * 20) * box,
+                y: Math.floor(Math.random() * 20) * box,
+            };
+            direction = null;
+            clearInterval(game);
+            game = setInterval(() => {
+                moveSnake();
+                drawGame();
+            }, 100);
+        }
+
+        // Iniciar el juego
+        let game = setInterval(() => {
+            moveSnake();
+            drawGame();
+        }, 100);
+    </script>
+</body>
+</html>
